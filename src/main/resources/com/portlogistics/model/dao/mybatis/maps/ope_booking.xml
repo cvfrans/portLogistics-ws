@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.portlogistics.model.dao.OpeBookingMapper">
+
+    <resultMap id="opeBookingResultMap" type="java.util.HashMap">
+        <result property="numSlp" column="nro_slp"/>
+        <result property="numAnio" column="anio_dua"/>
+        <result property="numBooking" column="nro_booking"/>
+        <result property="numDua" column="num_dua"/>
+        <result property="codAduana" column="cod_aduana"/>
+        <result property="codRegimen" column="cod_regimen"/>
+    </resultMap>
+
+
+    <select id="listBookingDua" resultMap="opeBookingResultMap" parameterType="map">
+        select  od.nro_slp, od.anio_dua, ob.nro_booking,
+                od.num_dua, od.cod_aduana ,od.cod_regimen
+        from    ope_booking ob join ope_dua od
+                on (ob.codemp = od.codemp and ob.anio = od.anio_booking and
+                ob.item = od.item_booking ) join OPE_DUA_DOCUMENTOS_HISTORIAL odh on
+                (odh.codemp = od.codemp and odh.anio_dua = od.anio_dua and
+                odh.cod_aduana = od.cod_aduana and odh.cod_regimen = od.cod_regimen and
+                odh.num_dua = od.num_dua)
+        <where>
+            <trim prefix="(" prefixOverrides="OR" suffix=")">
+                <if test="numBooking != null">
+                    (ob.nro_booking like '%'||#{numBooking}||'%')
+                </if>
+                <if test="numDua != null">
+                    or (od.num_dua like '%'||#{numDua}||'%')
+                </if>
+                <if test="numSlp != null">
+                    or (od.nro_slp like '%'||#{numSlp}||'%')
+                </if>
+            </trim>
+            <trim prefix="AND (" prefixOverrides=" " suffix=")">
+                <if test="numDoce != null">
+                    ((current_date - odh.fec_actividad)/30 <![CDATA[ < ]]> #{numDoce})
+                </if>
+                <if test="numSeis != null">
+                    ((current_date - odh.fec_actividad)/30 <![CDATA[ < ]]> #{numSeis})
+                </if>
+                <if test="numTres != null">
+                    ((current_date - odh.fec_actividad)/30 <![CDATA[ < ]]> #{numTres})
+                </if>
+            </trim>
+        </where>
+
+
+
+    </select>
+</mapper>
